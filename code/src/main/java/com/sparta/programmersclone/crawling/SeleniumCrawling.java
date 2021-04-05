@@ -1,0 +1,97 @@
+package com.sparta.programmersclone.crawling;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+
+import java.util.List;
+
+public class SeleniumCrawling {
+
+    private WebDriver driver;
+    private WebElement element;
+    private String url;
+
+    // 1. 드라이버 설치 경로
+    public static String WEB_DRIVER_ID = "webdriver.chrome.driver";
+    public static String WEB_DRIVER_PATH = "/Users/geonyeolpark/Documents/Hanghae99/chromedriver";
+
+    public SeleniumCrawling() {
+        // WebDriver 경로 설정
+        System.setProperty(WEB_DRIVER_ID, WEB_DRIVER_PATH);
+
+        // 2. WebDriver 옵션 설정
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--start-maximized");
+        options.addArguments("--disable-popup-blocking");
+
+        driver = new ChromeDriver(options);
+
+        url = "https://programmers.co.kr/learn/challenges?tab=all_challenges";
+    }
+
+    public void activateBot() throws InterruptedException {
+        driver.get(url);
+        int endPage = Integer.parseInt(driver.findElement(By.xpath("//*[@id=\"tab_all_challenges\"]/section/div/div[2]/div[2]/div[2]/nav/ul/li[8]/a")).getText());
+        int problemNum = 1;
+
+        for (int page = 1; page <= endPage; page++) { // 마지막 페이지로 긁어와서 설정
+            try {
+                System.out.println("\n\n\n**********************************************************************************");
+                System.out.println(page + "페이지");
+                System.out.println("**********************************************************************************");
+
+                String html = driver.getPageSource();
+                String[] divideProblems = html.split("<div class=\"col-item\">");
+                String[][] problemLanguages = new String[divideProblems.length][];
+
+                for (int i = 1; i < divideProblems.length; i++) {
+                    String[] languages = divideProblems[i].split("data-original-title=\"");
+                    problemLanguages[i] = new String[languages.length];
+                    for (int j = 1; j < languages.length; j++) {
+                        problemLanguages[i][j] = languages[j].split("\"")[0];
+                    }
+                }
+
+                List<WebElement> el1 = driver.findElements(By.className("col-item"));
+                for (int i = 0; i < el1.size(); i++) {
+                    System.out.println("----------------------------------------------------------");
+                    System.out.println(problemNum + " : " + el1.get(i).getText());
+                    problemNum++;
+                    for (int j = 1; j < problemLanguages[i + 1].length; j++) {
+                        System.out.print(problemLanguages[i + 1][j] + " ");
+                    }
+                    System.out.println();
+                }
+                System.out.println("----------------------------------------------------------\n");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // 아래는 다음페이지로 이동하는 부분인데 페이지마다 리스트 크기가 조금씩 바뀌어서 저렇게 명시를 해주었음
+            // 아마 조건 안나눌 방법이 있을 것 같음
+            if (page == 11) break;
+            if (page <= 3) {
+                driver.findElement(By.xpath("//*[@id=\"tab_all_challenges\"]/section/div/div[2]/div[2]/div[2]/nav/ul/li[9]/a")).click();
+            } else if (page == 4) {
+                driver.findElement(By.xpath("//*[@id=\"tab_all_challenges\"]/section/div/div[2]/div[2]/div[2]/nav/ul/li[10]/a")).click();
+            } else if (page <= 7) {
+                driver.findElement(By.xpath("//*[@id=\"tab_all_challenges\"]/section/div/div[2]/div[2]/div[2]/nav/ul/li[11]/a")).click();
+            } else if (page == 8) {
+                driver.findElement(By.xpath("//*[@id=\"tab_all_challenges\"]/section/div/div[2]/div[2]/div[2]/nav/ul/li[10]/a")).click();
+            } else {
+                driver.findElement(By.xpath("//*[@id=\"tab_all_challenges\"]/section/div/div[2]/div[2]/div[2]/nav/ul/li[9]/a")).click();
+            }
+            Thread.sleep(300);
+        }
+        driver.close();
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        SeleniumCrawling seleniumCrawling = new SeleniumCrawling();
+        seleniumCrawling.activateBot();
+    }
+}
