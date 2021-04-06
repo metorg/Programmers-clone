@@ -1,5 +1,7 @@
 package com.sparta.programmersclone.crawling;
 
+import com.sparta.programmersclone.controller.ProblemController;
+import com.sparta.programmersclone.repository.ProblemRepository;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -32,16 +34,19 @@ public class SeleniumCrawling {
         url = "https://programmers.co.kr/learn/challenges?tab=all_challenges";
     }
 
-    public void activateBot() throws InterruptedException {
+    public String[][] activateBot() throws InterruptedException {
         driver.get(url);
         int endPage = Integer.parseInt(driver.findElement(By.xpath("//*[@id=\"tab_all_challenges\"]/section/div/div[2]/div[2]/div[2]/nav/ul/li[8]/a")).getText());
+//        endPage = 1;
         int problemNum = 1;
+
+        String AllInfo[][] = new String[210 + 1][4 + 1]; // 전체 문제 개수가 210
 
         for (int page = 1; page <= endPage; page++) { // 마지막 페이지로 긁어와서 설정
             try {
-                System.out.println("\n\n\n**********************************************************************************");
-                System.out.println(page + "페이지");
-                System.out.println("**********************************************************************************");
+//                System.out.println("\n\n\n**********************************************************************************");
+//                System.out.println(page + "페이지");
+//                System.out.println("**********************************************************************************");
 
                 String html = driver.getPageSource();
                 String[] divideProblems = html.split("<div class=\"col-item\">");
@@ -57,15 +62,47 @@ public class SeleniumCrawling {
 
                 List<WebElement> el1 = driver.findElements(By.className("col-item"));
                 for (int i = 0; i < el1.size(); i++) {
-                    System.out.println("----------------------------------------------------------");
-                    System.out.println(problemNum + " : " + el1.get(i).getText());
-                    problemNum++;
-                    for (int j = 1; j < problemLanguages[i + 1].length; j++) {
-                        System.out.print(problemLanguages[i + 1][j] + " ");
+//                    System.out.println("----------------------------------------------------------");
+//                    System.out.println(problemNum + " : " + el1.get(i).getText());
+                    String problemInfo = el1.get(i).getText();
+
+                    String[] enterTok = problemInfo.split("\n");
+
+                    // 1.제목
+                    String problemTitle = enterTok[0];
+//                    System.out.println(problemTitle);
+
+                    // 2.완료자수
+                    String finishedCount = enterTok[1].split("명 완료")[0];
+                    String[] spaceTok = finishedCount.split(" ");
+                    finishedCount = spaceTok[spaceTok.length - 1];
+//                    System.out.println(finishedCount);
+
+
+                    // 3.출처
+                    String problemSource = "";
+                    for (int j = 0; j < spaceTok.length - 1; j++) {
+//                        System.out.print(spaceTok[j] + " ");
+                        problemSource += spaceTok[j] + " ";
                     }
-                    System.out.println();
+//                    System.out.println(problemSource);
+
+                    // 4.지원언어
+                    String problemLanguage = "";
+//                    System.out.print("지원 언어 : ");
+                    for (int j = 1; j < problemLanguages[i + 1].length; j++) {
+//                        System.out.print(problemLanguages[i + 1][j] + " ");
+                        problemLanguage += problemLanguages[i + 1][j] + " ";
+                    }
+//                    System.out.println(problemLanguage);
+
+                    AllInfo[problemNum][1] = problemTitle;
+                    AllInfo[problemNum][2] = finishedCount;
+                    AllInfo[problemNum][3] = problemSource;
+                    AllInfo[problemNum][4] = problemLanguage;
+                    problemNum++;
                 }
-                System.out.println("----------------------------------------------------------\n");
+//                System.out.println("----------------------------------------------------------\n");
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -85,9 +122,18 @@ public class SeleniumCrawling {
             } else {
                 driver.findElement(By.xpath("//*[@id=\"tab_all_challenges\"]/section/div/div[2]/div[2]/div[2]/nav/ul/li[9]/a")).click();
             }
-            Thread.sleep(300);
+            Thread.sleep(500);
         }
+        // 2차원 배열 출력확인
+//        for (int i = 1; i < problemNum; i++) {
+//            System.out.print(i + " : ");
+//            for (int j = 1; j < AllInfo[i].length; j++) {
+//                System.out.println(AllInfo[i][j]);
+//            }
+//            System.out.println("--------------------------------------------");
+//        }
         driver.close();
+        return AllInfo;
     }
 
     public static void main(String[] args) throws InterruptedException {
