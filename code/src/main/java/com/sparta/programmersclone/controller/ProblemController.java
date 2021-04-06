@@ -31,7 +31,7 @@ public class ProblemController {
 
         Problem problem;
         for (int i = 1; i < AllInfo.length; i++) {
-            problem = new Problem(AllInfo[i][1], AllInfo[i][2], AllInfo[i][3], AllInfo[i][4]);
+            problem = new Problem(AllInfo[i][1], AllInfo[i][2], AllInfo[i][3], AllInfo[i][4], AllInfo[i][5]);
             problemRepository.save(problem);
         }
 
