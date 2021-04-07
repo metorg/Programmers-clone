@@ -6,16 +6,25 @@ import com.sparta.programmersclone.crawling.SeleniumCrawling;
 import com.sparta.programmersclone.dto.ProblemRequestDto;
 import com.sparta.programmersclone.dto.ProgrammingLanguageRequestDto;
 import com.sparta.programmersclone.entity.Problem;
+import com.sparta.programmersclone.entity.ProgrammingLanguage;
 import com.sparta.programmersclone.repository.ProblemRepository;
+import com.sparta.programmersclone.repository.ProgrammingLanguageRepostiory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
 public class ProblemController {
     private final ProblemRepository problemRepository;
-    private final ProblemService service;
+    private final ProgrammingLanguageRepostiory programmingLanguageRepostiory;
+    private final ProblemService problemService;
     private final ProgrammingLanguageService programmingLanguageService;
 
 
@@ -38,7 +47,7 @@ public class ProblemController {
             problemRequestDto.setFinishedCount(AllInfo[i][2]);
             problemRequestDto.setProblemSource(AllInfo[i][3]);
             problemRequestDto.setProblemLevel(AllInfo[i][5]);
-            Long id = service.create(problemRequestDto);
+            Long id = problemService.create(problemRequestDto);
 
             String[] strAry = AllInfo[i][4].split(" ");
             for (String s : strAry) {
@@ -54,4 +63,47 @@ public class ProblemController {
     public List<Problem> AllProblem() {
         return problemRepository.findAll();
     }
+
+    @GetMapping("/filter")
+    public List<Problem> filterlingProblem(
+            @RequestParam(required = false, value = "level") String[] level,
+            @RequestParam(required = false, value = "language") String[] language,
+            @RequestParam(required = false, value = "reference") String[] reference
+    ) throws UnsupportedEncodingException {
+//        return problemService.filteringProblems(level, language, reference);
+        List<Problem> result = null;
+        if (level != null && reference == null) {
+            List<Problem> tmp = null;
+            result = problemRepository.findByProblemLevel(level[0]);
+            // 한 카테고리에서 다중 선택시 리스트에 추가해줌(OR 연산 느낌)
+            for (int i = 1; i < level.length; i++) {
+                System.out.println(level[i]);
+                tmp = problemRepository.findByProblemLevel(level[i]);
+                result.addAll(tmp);
+            }
+        }
+        if (level == null && reference != null) {
+            result = problemRepository.findByProblemSource(reference[0]);
+        }
+        if (level != null && reference != null) {
+            result = problemRepository.findByProblemLevelAndProblemSource(level[0], reference[0]);
+        }
+
+//        List<ProgrammingLanguage> programmingLanguages = programmingLanguageRepostiory.findByLanguage(language[0]);
+//
+////        List<Problem> tmp = null;
+//        Long problemId = programmingLanguages.get(0).getProblem().getId();
+//        System.out.println(problemId);
+//        result = new ArrayList(Arrays.asList(problemService.findById(problemId)));
+//
+//        for (int i = 1; i < programmingLanguages.size(); i++) {
+//            problemId = programmingLanguages.get(i).getProblem().getId();
+//            result.add(problemService.findById(problemId));
+//            System.out.println(problemId);
+//
+//        }
+        return result;
+
+    }
 }
+

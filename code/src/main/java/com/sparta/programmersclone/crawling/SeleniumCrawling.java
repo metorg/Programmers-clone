@@ -16,7 +16,7 @@ public class SeleniumCrawling {
 
     // 1. 드라이버 설치 경로
     public static String WEB_DRIVER_ID = "webdriver.chrome.driver";
-    public static String WEB_DRIVER_PATH = "C:\\Users\\leeseungmin\\Desktop\\chromedriver_win32\\chromedriver.exe";
+    public static String WEB_DRIVER_PATH = "/Users/geonyeolpark/Documents/Hanghae99/chromedriver";
 
     public SeleniumCrawling() {
         // WebDriver 경로 설정
@@ -40,20 +40,20 @@ public class SeleniumCrawling {
 //
         String AllInfo[][] = new String[211][5 + 1]; // 전체 문제 개수가 211 ??
 
-        for (int level = 1; level <= 1; level++) {
+        for (int level = 1; level <= 5; level++) {
             System.out.println("@@@@@@@@@@@난이도 : " + level);
             if (level >= 2) {
                 int prevLevel = level - 1;
-                Thread.sleep(3000);
+                Thread.sleep(2000);
                 driver.findElement(By.xpath("/html/body/div[3]/div[3]/div/section/div/div[1]/div[1]/ul/li[" + prevLevel + "]/label/span")).click();
 
                 // 초기화 버튼 클
                 //*[@id="resetFilter"]
 //                driver.findElement(By.xpath("//*[@id=\"resetFilter\"]")).click();
-                Thread.sleep(1000);
+                Thread.sleep(500);
             }
             driver.findElement(By.xpath("/html/body/div[3]/div[3]/div/section/div/div[1]/div[1]/ul/li[" + level + "]/label/span")).click();
-            Thread.sleep(1000);
+            Thread.sleep(500);
 
 
             for (int page = 1; page <= endPage[level]; page++) { // 마지막 페이지로 긁어와서 설정
@@ -99,6 +99,7 @@ public class SeleniumCrawling {
                             //                        System.out.print(spaceTok[j] + " ");
                             problemSource += spaceTok[j] + " ";
                         }
+                        problemSource = problemSource.trim();
                         //                    System.out.println(problemSource);
 
                         // 4.지원언어
