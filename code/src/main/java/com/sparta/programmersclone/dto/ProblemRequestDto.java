@@ -9,10 +9,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 public class ProblemRequestDto {
-
     private String problemTitle;
     private String finishedCount;
     private String problemSource;
+    private String problemLanguage;
     private String problemLevel;
 
 }

@@ -12,12 +12,7 @@ import com.sparta.programmersclone.repository.ProgrammingLanguageRepostiory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,17 +30,14 @@ public class ProblemController {
         ProgrammingLanguageRequestDto programmingLanguageRequestDto = new ProgrammingLanguageRequestDto();
         SeleniumCrawling seleniumCrawling = new SeleniumCrawling();
         String[][] AllInfo = seleniumCrawling.activateBot();
-//      System.out.println("방가");
-//      Problem problem = new Problem("임의의 제목", "난이도", "출처", "언어");
 
-        Problem problem;
         for (int i = 1; i < AllInfo.length; i++) {
-//            problem = new Problem(AllInfo[i][1], AllInfo[i][2], AllInfo[i][3], AllInfo[i][4], AllInfo[i][5]);
-//            problemRepository.save(problem);
 
             problemRequestDto.setProblemTitle(AllInfo[i][1]);
             problemRequestDto.setFinishedCount(AllInfo[i][2]);
             problemRequestDto.setProblemSource(AllInfo[i][3]);
+            AllInfo[i][4] = AllInfo[i][4].trim();
+            problemRequestDto.setProblemLanguage(AllInfo[i][4]);
             problemRequestDto.setProblemLevel(AllInfo[i][5]);
             Long id = problemService.create(problemRequestDto);
 
@@ -69,41 +61,94 @@ public class ProblemController {
             @RequestParam(required = false, value = "level") String[] level,
             @RequestParam(required = false, value = "language") String[] language,
             @RequestParam(required = false, value = "reference") String[] reference
-    ) throws UnsupportedEncodingException {
-//        return problemService.filteringProblems(level, language, reference);
+    ) {
+        int[] visit = new int[2000];
+        Long problemId;
+
+        // 선택한 분류들의 카운트
+        int selectCount = 0;
+        if (level != null) selectCount++;
+        if (language != null) selectCount += language.length;
+        if (reference != null) selectCount++;
+
         List<Problem> result = null;
-        if (level != null && reference == null) {
+        if (level != null) {
             List<Problem> tmp = null;
             result = problemRepository.findByProblemLevel(level[0]);
+
+            for (int i = 0; i < result.size(); i++) {
+                problemId = result.get(i).getId();
+                visit[Math.toIntExact(problemId)]++;
+            }
+
             // 한 카테고리에서 다중 선택시 리스트에 추가해줌(OR 연산 느낌)
             for (int i = 1; i < level.length; i++) {
-                System.out.println(level[i]);
+//                System.out.println(level[i]);
                 tmp = problemRepository.findByProblemLevel(level[i]);
-                result.addAll(tmp);
+                for (int j = 0; j < tmp.size(); j++) {
+                    problemId = tmp.get(j).getId();
+                    visit[Math.toIntExact(problemId)]++;
+                }
             }
         }
-        if (level == null && reference != null) {
+
+
+        if (reference != null) {
+            List<Problem> tmp = null;
             result = problemRepository.findByProblemSource(reference[0]);
-        }
-        if (level != null && reference != null) {
-            result = problemRepository.findByProblemLevelAndProblemSource(level[0], reference[0]);
+
+            for (int i = 0; i < result.size(); i++) {
+                problemId = result.get(i).getId();
+                visit[Math.toIntExact(problemId)]++;
+            }
+
+            // 한 카테고리에서 다중 선택시 리스트에 추가해줌(OR 연산 느낌)
+            for (int i = 1; i < reference.length; i++) {
+                tmp = problemRepository.findByProblemSource(reference[i]);
+                for (int j = 0; j < tmp.size(); j++) {
+                    problemId = tmp.get(j).getId();
+                    visit[Math.toIntExact(problemId)]++;
+                }
+            }
         }
 
-//        List<ProgrammingLanguage> programmingLanguages = programmingLanguageRepostiory.findByLanguage(language[0]);
-//
-////        List<Problem> tmp = null;
-//        Long problemId = programmingLanguages.get(0).getProblem().getId();
-//        System.out.println(problemId);
-//        result = new ArrayList(Arrays.asList(problemService.findById(problemId)));
-//
-//        for (int i = 1; i < programmingLanguages.size(); i++) {
-//            problemId = programmingLanguages.get(i).getProblem().getId();
-//            result.add(problemService.findById(problemId));
-//            System.out.println(problemId);
-//
-//        }
+
+        if (language != null) {
+            for (int i = 0; i < language.length; i++) {
+                List<ProgrammingLanguage> programmingLanguages = programmingLanguageRepostiory.findByLanguage(language[i]);
+                problemId = programmingLanguages.get(0).getProblem().getId();
+                visit[Math.toIntExact(problemId)]++;
+                result = new ArrayList(Arrays.asList(problemService.findById(problemId)));
+
+                for (int j = 1; j < programmingLanguages.size(); j++) {
+                    problemId = programmingLanguages.get(j).getProblem().getId();
+                    visit[Math.toIntExact(problemId)]++;
+                    result.add(problemService.findById(problemId));
+                }
+            }
+        }
+
+        result = null;
+        int cnt = 0;
+        System.out.println("---------------------------------------------");
+        boolean flag = false;
+        for (int i = 1; i < 2000; i++) {
+            if (visit[i] >= selectCount) {
+                if (!flag) {
+                    result = new ArrayList(Arrays.asList(problemService.findById((long) i)));
+                    flag = true;
+                    System.out.println(i + " : " + visit[i]);
+                    cnt++;
+                    continue;
+                }
+                System.out.println(i + " : " + visit[i]);
+                result.add(problemService.findById((long) i));
+                cnt++;
+            }
+        }
+        System.out.println(cnt);
+
         return result;
-
     }
 }
 

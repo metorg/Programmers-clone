@@ -22,5 +22,4 @@ public class ProblemService {
     public Problem findById(Long id) {
         return problemRepository.findById(id).orElseThrow(() -> new NullPointerException());
     }
-
 }

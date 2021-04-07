@@ -17,6 +17,7 @@ public class Problem {
         this.problemTitle = requestDto.getProblemTitle();
         this.problemLevel = requestDto.getProblemLevel();
         this.problemSource = requestDto.getProblemSource();
+        this.problemLanguage = requestDto.getProblemLanguage();
         this.finishedCount = requestDto.getFinishedCount();
     }
 
@@ -36,6 +37,10 @@ public class Problem {
     // 문제 출처
     @Column(nullable = false)
     private String problemSource;
+
+    // 제공 언어
+    @Column(nullable = false)
+    private String problemLanguage;
 
     // 문제 난이도
     @Column(nullable = false)
