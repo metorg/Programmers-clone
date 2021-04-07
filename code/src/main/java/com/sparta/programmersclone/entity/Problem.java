@@ -1,5 +1,6 @@
 package com.sparta.programmersclone.entity;
 
+import com.sparta.programmersclone.dto.ProblemRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,12 +13,11 @@ import javax.persistence.*;
 @Entity
 public class Problem {
 
-    public Problem(String problemTitle, String finishedCount, String problemSource, String problemLanguage, String problemLevel) {
-        this.problemTitle = problemTitle;
-        this.finishedCount = finishedCount;
-        this.problemSource = problemSource;
-        this.problemLanguage = problemLanguage;
-        this.problemLevel = problemLevel;
+    public Problem(ProblemRequestDto requestDto) {
+        this.problemTitle = requestDto.getProblemTitle();
+        this.problemLevel = requestDto.getProblemLevel();
+        this.problemSource = requestDto.getProblemSource();
+        this.finishedCount = requestDto.getFinishedCount();
     }
 
     // ID가 자동으로 생성 및 증가
@@ -36,10 +36,6 @@ public class Problem {
     // 문제 출처
     @Column(nullable = false)
     private String problemSource;
-
-    // 지원 언어
-    @Column(nullable = false)
-    private String problemLanguage;
 
     // 문제 난이도
     @Column(nullable = false)

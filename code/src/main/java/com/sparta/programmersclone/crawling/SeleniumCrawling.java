@@ -16,7 +16,7 @@ public class SeleniumCrawling {
 
     // 1. 드라이버 설치 경로
     public static String WEB_DRIVER_ID = "webdriver.chrome.driver";
-    public static String WEB_DRIVER_PATH = "/Users/geonyeolpark/Documents/Hanghae99/chromedriver";
+    public static String WEB_DRIVER_PATH = "C:\\Users\\leeseungmin\\Desktop\\chromedriver_win32\\chromedriver.exe";
 
     public SeleniumCrawling() {
         // WebDriver 경로 설정
@@ -40,7 +40,7 @@ public class SeleniumCrawling {
 //
         String AllInfo[][] = new String[211][5 + 1]; // 전체 문제 개수가 211 ??
 
-        for (int level = 1; level <= 5; level++) {
+        for (int level = 1; level <= 1; level++) {
             System.out.println("@@@@@@@@@@@난이도 : " + level);
             if (level >= 2) {
                 int prevLevel = level - 1;
