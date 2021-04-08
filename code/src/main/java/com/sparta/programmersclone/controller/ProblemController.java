@@ -5,10 +5,8 @@ import com.sparta.programmersclone.Service.ProgrammingLanguageService;
 import com.sparta.programmersclone.crawling.SeleniumCrawling;
 import com.sparta.programmersclone.dto.ProblemRequestDto;
 import com.sparta.programmersclone.dto.ProgrammingLanguageRequestDto;
-import com.sparta.programmersclone.entity.Problem;
-import com.sparta.programmersclone.entity.ProgrammingLanguage;
-import com.sparta.programmersclone.repository.ProblemRepository;
-import com.sparta.programmersclone.repository.ProgrammingLanguageRepostiory;
+import com.sparta.programmersclone.entity.*;
+import com.sparta.programmersclone.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +19,15 @@ public class ProblemController {
     private final ProgrammingLanguageRepostiory programmingLanguageRepostiory;
     private final ProblemService problemService;
     private final ProgrammingLanguageService programmingLanguageService;
+    private final FilterLevelRepository filterLevelRepository;
+    private final FilterLanguageRepository filterLanguageRepository;
+    private final FilterReferenceRepository filterReferenceRepository;
 
+    @GetMapping("/")
+    public List<Problem> AllProblem() {
+
+        return problemRepository.findAll();
+    }
 
     @GetMapping("/save")
     public void createProblem() throws InterruptedException {
@@ -51,9 +57,19 @@ public class ProblemController {
         }
     }
 
-    @GetMapping("/")
-    public List<Problem> AllProblem() {
-        return problemRepository.findAll();
+    @GetMapping("/filter/level")
+    public List<FilterLevel> createFilterLevel() {
+        return filterLevelRepository.findAll();
+    }
+
+    @GetMapping("/filter/language")
+    public List<FilterLanguage> createFilterLanguage() {
+        return filterLanguageRepository.findAll();
+    }
+
+    @GetMapping("/filter/reference")
+    public List<FilterReference> createFilterReference() {
+        return filterReferenceRepository.findAll();
     }
 
     @GetMapping("/filter")
