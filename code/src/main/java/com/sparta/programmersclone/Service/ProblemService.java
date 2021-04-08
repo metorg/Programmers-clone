@@ -4,7 +4,12 @@ import com.sparta.programmersclone.dto.ProblemRequestDto;
 import com.sparta.programmersclone.entity.Problem;
 import com.sparta.programmersclone.repository.ProblemRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @RequiredArgsConstructor
@@ -21,5 +26,10 @@ public class ProblemService {
 
     public Problem findById(Long id) {
         return problemRepository.findById(id).orElseThrow(() -> new NullPointerException());
+    }
+
+    public Page<Problem> getProblems(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return problemRepository.findAll(pageable);
     }
 }

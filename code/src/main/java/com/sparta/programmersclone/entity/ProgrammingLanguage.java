@@ -15,7 +15,6 @@ import javax.persistence.*;
 public class ProgrammingLanguage {
 
     // ID가 자동으로 생성 및 증가
-
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
     private Long id;
@@ -26,9 +25,7 @@ public class ProgrammingLanguage {
     @JoinColumn(name = "Problem_ID")
     private Problem problem;
 
-
     public ProgrammingLanguage(ProgrammingLanguageRequestDto requestDto, ProblemService problemService) {
-
         this.language = requestDto.getLanguage();
         this.problem = problemService.findById(requestDto.getProblemId());
     }

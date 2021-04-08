@@ -1,5 +1,6 @@
 package com.sparta.programmersclone.controller;
 
+import com.sparta.programmersclone.Service.FilteringProblemService;
 import com.sparta.programmersclone.Service.ProblemService;
 import com.sparta.programmersclone.Service.ProgrammingLanguageService;
 import com.sparta.programmersclone.crawling.SeleniumCrawling;
@@ -17,6 +18,7 @@ import java.util.*;
 @RestController
 @RequiredArgsConstructor
 public class ProblemController {
+
     private final ProblemRepository problemRepository;
     private final ProgrammingLanguageRepostiory programmingLanguageRepostiory;
     private final ProblemService problemService;
@@ -25,6 +27,9 @@ public class ProblemController {
     private final FilterLanguageRepository filterLanguageRepository;
     private final FilterReferenceRepository filterReferenceRepository;
     private final BannerRepository bannerRepository;
+    private final FilteringProblemRepository filteringProblemRepository;
+    private final FilteringProblemService filteringProblemService;
+
 
     @GetMapping("/")
     public List<Problem> AllProblem() {
@@ -79,33 +84,19 @@ public class ProblemController {
         return filterReferenceRepository.findAll();
     }
 
-    @GetMapping("/test")
-    public Page<Problem> getProblem(
-            @RequestParam(required = false, value = "page") int page,
-            @RequestParam(required = false, value = "size") int size
-    ) {
-        System.out.println(page);
-        System.out.println(size);
-//        int p = Integer.parseInt(page);
-//        int s = Integer.parseInt(size);
-//        System.out.println(p);
-//        System.out.println(s);
-        Page<Problem> result = problemService.getProblems(page, size);
-        page = page - 1;
-        for (int i = 0; i < result.getSize(); i++) {
-            System.out.println(i);
-//            System.out.println(result.get(i));
-        }
-
-        return problemService.getProblems(page, size);
-    }
-
     @GetMapping("/filter")
-    public List<Problem> filterlingProblem(
+    public Page<FilteringProblem> filterlingProblem(
             @RequestParam(required = false, value = "level") String[] level,
             @RequestParam(required = false, value = "language") String[] language,
-            @RequestParam(required = false, value = "reference") String[] reference
+            @RequestParam(required = false, value = "reference") String[] reference,
+            @RequestParam(required = false, value = "page") String strPage
+//            @RequestParam(required = false, value = "size") int size
     ) {
+        int size = 20;
+        int page = 1;
+        if (strPage != null) {
+            page = Integer.parseInt(strPage);
+        }
         int[] visit = new int[2000];
         Long problemId;
 
@@ -136,7 +127,6 @@ public class ProblemController {
             }
         }
 
-
         if (reference != null) {
             List<Problem> tmp = null;
             result = problemRepository.findByProblemSource(reference[0]);
@@ -156,7 +146,6 @@ public class ProblemController {
             }
         }
 
-
         if (language != null) {
             for (int i = 0; i < language.length; i++) {
                 List<ProgrammingLanguage> programmingLanguages = programmingLanguageRepostiory.findByLanguage(language[i]);
@@ -173,26 +162,26 @@ public class ProblemController {
         }
 
         result = null;
-        int cnt = 0;
         System.out.println("---------------------------------------------");
         boolean flag = false;
-        for (int i = 1; i < 2000; i++) {
+        for (int i = 1; i < visit.length; i++) {
             if (visit[i] >= selectCount) {
                 if (!flag) {
                     result = new ArrayList(Arrays.asList(problemService.findById((long) i)));
                     flag = true;
-//                    System.out.println(i + " : " + visit[i]);
-                    cnt++;
                     continue;
                 }
-//                System.out.println(i + " : " + visit[i]);
                 result.add(problemService.findById((long) i));
-                cnt++;
             }
         }
-//        System.out.println(cnt);
 
-        return result;
+        filteringProblemRepository.deleteAll();
+        for (int i = 0; i < result.size(); i++) {
+            FilteringProblem filteringProblem = new FilteringProblem(result.get(i));
+            filteringProblemRepository.save(filteringProblem);
+        }
+        page = page - 1; // 인덱스 처리
+        return filteringProblemService.getProblems(page, size);
     }
 }
 
