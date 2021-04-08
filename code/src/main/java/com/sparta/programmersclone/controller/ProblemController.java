@@ -8,6 +8,7 @@ import com.sparta.programmersclone.dto.ProgrammingLanguageRequestDto;
 import com.sparta.programmersclone.entity.*;
 import com.sparta.programmersclone.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -23,10 +24,10 @@ public class ProblemController {
     private final FilterLevelRepository filterLevelRepository;
     private final FilterLanguageRepository filterLanguageRepository;
     private final FilterReferenceRepository filterReferenceRepository;
+    private final BannerRepository bannerRepository;
 
     @GetMapping("/")
     public List<Problem> AllProblem() {
-
         return problemRepository.findAll();
     }
 
@@ -58,6 +59,11 @@ public class ProblemController {
         }
     }
 
+    @GetMapping("/banner")
+    public List<Banner> readBanner() {
+        return bannerRepository.findAll();
+    }
+
     @GetMapping("/filter/level")
     public List<FilterLevel> createFilterLevel() {
         return filterLevelRepository.findAll();
@@ -71,6 +77,27 @@ public class ProblemController {
     @GetMapping("/filter/reference")
     public List<FilterReference> createFilterReference() {
         return filterReferenceRepository.findAll();
+    }
+
+    @GetMapping("/test")
+    public Page<Problem> getProblem(
+            @RequestParam(required = false, value = "page") int page,
+            @RequestParam(required = false, value = "size") int size
+    ) {
+        System.out.println(page);
+        System.out.println(size);
+//        int p = Integer.parseInt(page);
+//        int s = Integer.parseInt(size);
+//        System.out.println(p);
+//        System.out.println(s);
+        Page<Problem> result = problemService.getProblems(page, size);
+        page = page - 1;
+        for (int i = 0; i < result.getSize(); i++) {
+            System.out.println(i);
+//            System.out.println(result.get(i));
+        }
+
+        return problemService.getProblems(page, size);
     }
 
     @GetMapping("/filter")
@@ -154,16 +181,16 @@ public class ProblemController {
                 if (!flag) {
                     result = new ArrayList(Arrays.asList(problemService.findById((long) i)));
                     flag = true;
-                    System.out.println(i + " : " + visit[i]);
+//                    System.out.println(i + " : " + visit[i]);
                     cnt++;
                     continue;
                 }
-                System.out.println(i + " : " + visit[i]);
+//                System.out.println(i + " : " + visit[i]);
                 result.add(problemService.findById((long) i));
                 cnt++;
             }
         }
-        System.out.println(cnt);
+//        System.out.println(cnt);
 
         return result;
     }
